@@ -439,8 +439,10 @@
     };
 
     const markDisabledRuns=()=>{
-      for(let r=0;r<CW.size;r++) for(let c=0;c<CW.size)cWloop: {
-        CW.cells[r][c].disabled = !CW.cells[r][c].black;
+      for(let r=0;r<CW.size;r++){
+        for(let c=0;c<CW.size;c++){
+          CW.cells[r][c].disabled = !CW.cells[r][c].black;
+        }
       }
       for(const p of placedClues){
         if(!Number.isInteger(p.num)) continue;
@@ -451,7 +453,11 @@
           if(!CW.cells[rr][cc].black) CW.cells[rr][cc].disabled=false;
         }
       }
-      for(let r=0;r<CW.size;r++) for(let c=0;c<CW.size;c++) if(CW.cells[r][c].disabled) CW.cells[r][c].char="";
+      for(let r=0;r<CW.size;r++){
+        for(let c=0;c<CW.size;c++){
+          if(CW.cells[r][c].disabled) CW.cells[r][c].char="";
+        }
+      }
     };
 
     const drawDisabledState=()=>{
