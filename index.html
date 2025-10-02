@@ -45,13 +45,14 @@
     <!-- CROSSWORD (PLAY) -->
     <section id="crossword" class="section" role="tabpanel" aria-labelledby="Crossword">
       <div class="panel cw-wrap">
-        <div class="cw-viewport">
+        <div class="cw-viewport safe-area-bottom">
           <div class="cw-canvas">
             <div id="cw-grid" class="cw-grid" aria-label="Crossword grid"></div>
           </div>
+          <div class="active-clue sticky" id="active-clue">Tap a cell to start</div>
         </div>
 
-        <div class="toolbelt">
+        <div class="toolbelt sticky">
           <button id="tb-dir" class="ghost">Across</button>
           <button id="tb-prev" class="ghost">Prev</button>
           <button id="tb-next" class="ghost">Next</button>
@@ -61,8 +62,7 @@
         </div>
 
         <div class="clues-sheet">
-          <div class="sheet-handle"></div>
-          <div class="active-clue" id="active-clue">Tap a cell to start</div>
+          <div class="sheet-handle" id="sheet-toggle"></div>
           <div class="cw-clues">
             <div class="clue">
               <h4>Across</h4>

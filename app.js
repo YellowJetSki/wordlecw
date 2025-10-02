@@ -311,12 +311,17 @@
     const renderCWGrid=()=>{
       if(!cwGrid) return;
       cwGrid.innerHTML="";
-      cwGrid.style.gridTemplateColumns=`repeat(${CW.size}, 36px)`;
+      // Responsive columns: compute by viewport width
+      const ideal = Math.min(42, Math.max(30, Math.floor(viewport.clientWidth / CW.size) - 2));
+      const cellPx = Math.max(30, ideal);
+      cwGrid.style.gridTemplateColumns=`repeat(${CW.size}, ${cellPx}px)`;
+
       for(let r=0;r<CW.size;r++){
         for(let c=0;c<CW.size;c++){
           const cell=CW.cells[r][c];
           const d=document.createElement("div");
           d.className="cw-cell"+(cell.black?" black":"")+(cell.disabled?" disabled":"");
+          d.style.width=cellPx+"px"; d.style.height=cellPx+"px";
           if(cell.number && !cell.black){
             const n=document.createElement("div");
             n.className="cw-num"; n.textContent=cell.number; d.appendChild(n);
@@ -738,8 +743,7 @@
       renderCWGrid();
     };
 
-    const btnDir=$("#tb-dir"), btnPrev=$("#tb-prev"), btnNext=$("#tb-next"), activeClueEl=$("#active-clue");
-
+    const btnDir=$("#tb-dir"), btnPrev=$("#tb-prev"), btnNext=$("#tb-next"), activeClueEl=$("#active-clue"), sheetToggle=$("#sheet-toggle");
     const updateActiveClueHeader=()=>{
       const dir=CW.focus.dir;
       let r=CW.focus.row, c=CW.focus.col;
@@ -784,41 +788,22 @@
       }
     });
 
-    $("#cw-build")?.addEventListener("click", ()=>{
-      let entries=[];
-      try{ entries=JSON.parse($("#cw-json")?.value||"[]"); }
-      catch{ toast("Invalid JSON"); return; }
-      autoBuild(entries);
-      toast("Crossword built");
-    });
-
-    $("#cw-import")?.addEventListener("click", ()=>{
-      try{
-        const arr=JSON.parse($("#cw-json")?.value||"[]");
-        localStorage.setItem("cw.src", JSON.stringify(arr));
-        toast("Clues loaded");
-      }catch{ toast("Invalid JSON"); }
-    });
-
-    $("#cw-export")?.addEventListener("click", ()=>{
-      const out=placedClues
-        .filter(p=>Number.isInteger(p.num))
-        .map(p=>({num:p.num, dir:p.dir,row:p.row+1,col:p.col+1,answer:p.answer,clue:p.clue}));
-      const s=JSON.stringify(out,null,2);
-      navigator.clipboard.writeText(s).then(()=> toast("Exported to clipboard"));
-    });
-
-    const resetCrossword=()=>{
-      CW.cells=allocGrid(CW.size);
-      renderCWGrid();
-      persistCW();
-      toast("Crossword reset");
+    // Clues sheet toggle for compact screens
+    let sheetOpen=true;
+    const sheetEl=document.querySelector(".clues-sheet");
+    const setSheetState=(open)=>{
+      sheetOpen=open;
+      if(!sheetEl) return;
+      if(open){
+        sheetEl.style.maxHeight="42vh";
+        sheetEl.style.opacity="1";
+      }else{
+        sheetEl.style.maxHeight="0px";
+        sheetEl.style.opacity="0.2";
+      }
     };
-
-    $("#cw-admin-reset")?.addEventListener("click", resetCrossword);
-    $("#cw-play-reset")?.addEventListener("click", resetCrossword);
-    $("#cw-submit")?.addEventListener("click", submitCrossword);
-    $("#cw-clear-errors")?.addEventListener("click", clearMarks);
+    setSheetState(true);
+    sheetToggle?.addEventListener("click", ()=> setSheetState(!sheetOpen), {passive:true});
 
     // Initialize
     setCSSLen(); buildKeyboard(); restoreWordle(); renderBoard(); restoreCW();

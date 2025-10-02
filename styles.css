@@ -57,41 +57,64 @@ button.warn{background:linear-gradient(180deg,#3c2f2f,#2b2323); color:#ffe7e7; b
 .legend{display:flex;gap:8px;flex-wrap:wrap}
 .badge{padding:4px 8px;border-radius:999px;border:1px solid #2b3246;background:#121a33;font-size:.8rem}
 
-/* Crossword */
+/* Crossword layout */
 .cw-wrap{display:grid;gap:12px}
-.cw-viewport{position:relative;overflow:hidden;border-radius:14px;border:1px solid #232b44;background:linear-gradient(180deg,#151b31,#0f1426)}
+.cw-viewport{position:relative;overflow:hidden;border-radius:14px;border:1px solid #232b44;background:linear-gradient(180deg,#151b31,#0f1426); min-height: 50vh}
 .cw-canvas{transform-origin:0 0;touch-action:none}
 .cw-grid{display:grid;gap:2px;justify-content:center}
-.cw-cell{width:34px;height:34px;background:#0e1424;border:1px solid #2b3246;border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;font-weight:800;text-transform:uppercase}
+.cw-cell{width:38px;height:38px;background:#0e1424;border:1px solid #2b3246;border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;font-weight:800;text-transform:uppercase}
 .cw-cell.black{background:#000;border-color:#000}
-.cw-num{position:absolute;top:2px;left:4px;font-size:.62rem;color:var(--muted);font-weight:700}
-.cw-letter{position:relative;z-index:1}
+.cw-num{position:absolute;top:2px;left:4px;font-size:.66rem;color:var(--muted);font-weight:700}
+.cw-letter{position:relative;z-index:1;font-size:1rem}
 .cw-cell input{position:absolute;inset:0;width:100%;height:100%;opacity:0}
 .cw-cell.disabled{opacity:.35}
 .cw-cell.word{background:var(--wordHl)}
-.toolbelt{position:sticky;bottom:0;display:flex;gap:8px;justify-content:space-between;background:linear-gradient(180deg,#141a33,#0e1426);border:1px solid #232b44;border-radius:12px;padding:8px;margin-top:8px}
-.clues-sheet{position:sticky;bottom:0;background:linear-gradient(180deg,#10162a,#0b1120);border:1px solid #232b44;border-radius:14px;padding:8px;box-shadow:var(--shadow)}
-.sheet-handle{width:36px;height:4px;background:#2a3147;border-radius:999px;margin:4px auto 8px auto}
-.active-clue{padding:8px 10px;border-radius:10px;background:#121a33;border:1px solid #232b44;margin-bottom:8px;color:#fff;font-size:1rem}
-.cw-clues{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.active-hl{outline:2px solid var(--accent)}
+
+.active-clue{padding:10px 12px;border-radius:10px;background:#121a33;border:1px solid #232b44;margin:8px;color:#fff;font-size:1.05rem}
+.sticky{position:sticky;bottom:0;z-index:3}
+.toolbelt{display:flex;gap:8px;justify-content:space-between;background:linear-gradient(180deg,#141a33,#0e1426);border:1px solid #232b44;border-radius:12px;padding:8px;margin-top:8px}
+.clues-sheet{position:sticky;bottom:0;background:linear-gradient(180deg,#10162a,#0b1120);border:1px solid #232b44;border-radius:14px;padding:8px;box-shadow:var(--shadow);transition:max-height .25s ease, opacity .25s ease}
+.sheet-handle{width:44px;height:5px;background:#2a3147;border-radius:999px;margin:4px auto 8px auto;cursor:pointer}
+.cw-clues{display:grid;gap:12px;grid-template-columns:1fr 1fr}
 .clue{background:linear-gradient(180deg,#141a33,#0e1426);border:1px solid #232b44;border-radius:14px;padding:12px}
 .clue h4{margin:0 0 6px 0}
 .clue ul{list-style:none;padding-left:0;margin:0}
-.clue li{margin:6px 0;cursor:pointer}
+.clue li{margin:6px 0;cursor:pointer;line-height:1.2}
 .clue li .num{min-width:28px;display:inline-block;color:#c9d2ff}
 
-.active-hl{outline:2px solid var(--accent)}
 .correct{background:var(--ok)!important}
 .incorrect{background:var(--bad)!important}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));background:#1e253a;color:#fff;padding:10px 14px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.show{opacity:1}
 
+/* Mobile-first adjustments */
+@media (max-width:820px){
+  .app{padding-bottom:calc(22px + env(safe-area-inset-bottom))}
+  .cw-grid{gap:2px}
+  .cw-cell{width:40px;height:40px;border-radius:8px}
+  .cw-letter{font-size:1.1rem}
+  .active-clue{font-size:1.05rem}
+  .toolbelt{flex-wrap:wrap;gap:6px}
+  .toolbelt button{flex:1;min-width:90px}
+  .cw-clues{grid-template-columns:1fr}
+  .clues-sheet{max-height:42vh; overflow:auto}
+  .cw-viewport{min-height:52vh}
+}
+
+/* Ultra-small phones */
 @media (max-width:380px){
-  .cw-cell{width:30px;height:30px}
+  .cw-cell{width:36px;height:36px}
   .cw-grid{gap:1.5px}
 }
+
+/* Desktop layout */
 @media (min-width:900px){
   .cw-wrap{grid-template-columns:1fr 380px; align-items:start}
-  .clues-sheet{position:static}
+  .active-clue.sticky{position:static;margin:0 0 8px 0}
   .toolbelt{position:static}
+  .clues-sheet{position:static;max-height:none}
 }
+
+/* Safe area bottom helper (applies only when no input is focused; mobile keyboards may ignore safe-area updates) */
+.safe-area-bottom{padding-bottom:calc(env(safe-area-inset-bottom))}
