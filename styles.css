@@ -1,0 +1,97 @@
+/* styles.css */
+:root{
+  --bg:#0b0d13; --card:#111523; --card2:#0f1422; --text:#e9ecf1; --muted:#9aa4b2; --line:#242a3a;
+  --accent:#5b86ff; --accent2:#7bb0ff; --shadow:0 10px 30px rgba(0,0,0,.35);
+  --green:#6bbb79; --yellow:#d5c162; --gray:#3a3e48; --key:#252a39; --keyText:#ecf0ff; --grid:#2a3144;
+  --ok:#2c4b33; --bad:#512e2e; --hl:#2a3355; --wordHl:#233055;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{
+  margin:0;background:
+  radial-gradient(1200px 800px at 10% -10%, #0f1730 0%, rgba(15,23,48,0) 60%),
+  radial-gradient(1200px 800px at 120% 10%, #0f1b2f 0%, rgba(15,27,47,0) 60%),
+  var(--bg);
+  color:var(--text); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif
+}
+.app{max-width:940px;margin:0 auto;padding:calc(8px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;justify-content:space-between;padding:8px 2px 12px}
+.brand{display:flex;gap:10px;align-items:center}
+.logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(145deg,#2a3350,#161b2b);box-shadow:inset 0 0 0 1px #2b3554, 0 6px 14px rgba(0,0,0,.35)}
+.title{font-weight:800;letter-spacing:.3px}
+.tabs{display:flex;gap:8px;background:rgba(16,22,38,.65);backdrop-filter:blur(10px);padding:6px;border:1px solid #232b44;border-radius:14px;box-shadow:var(--shadow)}
+.tab{padding:10px 14px;border-radius:12px;color:var(--muted);cursor:pointer;user-select:none;transition:.2s background,color}
+.tab.active{background:linear-gradient(180deg,#1a2240,#13192c); color:var(--text); box-shadow:inset 0 0 0 1px #2a3355}
+.section{display:none;margin-top:14px;animation:fade .2s ease}
+.section.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.panel{background:linear-gradient(180deg,rgba(22,27,45,.7),rgba(16,21,35,.7)); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:12px; box-shadow:var(--shadow)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row>*{flex:1}
+label{font-size:.86rem;color:var(--muted)}
+input[type=text], input[type=number], textarea{
+  width:100%; padding:12px 14px; border-radius:12px; border:1px solid #2b3246; background:linear-gradient(180deg,#0e1424,#0b1120);
+  color:var(--text); outline:none; transition:.15s border, box-shadow
+}
+textarea{min-height:140px}
+input:focus, textarea:focus{border-color:#394469; box-shadow:0 0 0 3px rgba(91,134,255,.15)}
+input[type=checkbox]{transform:scale(1.2)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between}
+.btns.right{justify-content:flex-end}
+button{background:linear-gradient(180deg,var(--accent),var(--accent2)); color:#0c1428; border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+button.ghost{background:linear-gradient(180deg,#212a45,#1a2036); color:var(--text); border:1px solid #2a3147}
+button.warn{background:linear-gradient(180deg,#3c2f2f,#2b2323); color:#ffe7e7; border:1px solid #4a3535}
+.hint{color:var(--muted);font-size:.86rem}
+
+/* Wordle */
+.wordle-wrap{display:flex;flex-direction:column;gap:12px}
+.board{display:grid;gap:8px;justify-content:center}
+.row-tiles{display:grid;grid-template-columns:repeat(var(--len),1fr);gap:8px}
+.tile{width:50px;height:50px;display:flex;align-items:center;justify-content:center;border:2px solid var(--grid);border-radius:10px;font-weight:800;font-size:1.25rem;text-transform:uppercase;background:#0e1424}
+.kbrd{display:grid;grid-template-columns:repeat(20,1fr);gap:8px;user-select:none}
+.key{grid-column:span 2;background:var(--key);color:var(--keyText);padding:12px;border-radius:10px;text-align:center;font-weight:800;cursor:pointer}
+.key.wide{grid-column:span 3}
+.key.state-absent{background:#454a57}
+.key.state-present{background:#c2ac4a}
+.key.state-correct{background:#56a05a}
+.legend{display:flex;gap:8px;flex-wrap:wrap}
+.badge{padding:4px 8px;border-radius:999px;border:1px solid #2b3246;background:#121a33;font-size:.8rem}
+
+/* Crossword */
+.cw-wrap{display:grid;gap:12px}
+.cw-viewport{position:relative;overflow:hidden;border-radius:14px;border:1px solid #232b44;background:linear-gradient(180deg,#151b31,#0f1426)}
+.cw-canvas{transform-origin:0 0;touch-action:none}
+.cw-grid{display:grid;gap:2px;justify-content:center}
+.cw-cell{width:34px;height:34px;background:#0e1424;border:1px solid #2b3246;border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;font-weight:800;text-transform:uppercase}
+.cw-cell.black{background:#000;border-color:#000}
+.cw-num{position:absolute;top:2px;left:4px;font-size:.62rem;color:var(--muted);font-weight:700}
+.cw-letter{position:relative;z-index:1}
+.cw-cell input{position:absolute;inset:0;width:100%;height:100%;opacity:0}
+.cw-cell.disabled{opacity:.35}
+.cw-cell.word{background:var(--wordHl)}
+.toolbelt{position:sticky;bottom:0;display:flex;gap:8px;justify-content:space-between;background:linear-gradient(180deg,#141a33,#0e1426);border:1px solid #232b44;border-radius:12px;padding:8px;margin-top:8px}
+.clues-sheet{position:sticky;bottom:0;background:linear-gradient(180deg,#10162a,#0b1120);border:1px solid #232b44;border-radius:14px;padding:8px;box-shadow:var(--shadow)}
+.sheet-handle{width:36px;height:4px;background:#2a3147;border-radius:999px;margin:4px auto 8px auto}
+.active-clue{padding:8px 10px;border-radius:10px;background:#121a33;border:1px solid #232b44;margin-bottom:8px;color:#fff;font-size:1rem}
+.cw-clues{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.clue{background:linear-gradient(180deg,#141a33,#0e1426);border:1px solid #232b44;border-radius:14px;padding:12px}
+.clue h4{margin:0 0 6px 0}
+.clue ul{list-style:none;padding-left:0;margin:0}
+.clue li{margin:6px 0;cursor:pointer}
+.clue li .num{min-width:28px;display:inline-block;color:#c9d2ff}
+
+.active-hl{outline:2px solid var(--accent)}
+.correct{background:var(--ok)!important}
+.incorrect{background:var(--bad)!important}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));background:#1e253a;color:#fff;padding:10px 14px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+
+@media (max-width:380px){
+  .cw-cell{width:30px;height:30px}
+  .cw-grid{gap:1.5px}
+}
+@media (min-width:900px){
+  .cw-wrap{grid-template-columns:1fr 380px; align-items:start}
+  .clues-sheet{position:static}
+  .toolbelt{position:static}
+}

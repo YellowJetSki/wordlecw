@@ -1,0 +1,132 @@
+<!-- index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, viewport-fit=cover, initial-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Wordle + Crossword</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo"></div>
+        <div class="title">Wordle + Crossword</div>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Modes">
+        <div class="tab active" data-tab="wordle" role="tab" aria-selected="true" aria-controls="wordle">Wordle</div>
+        <div class="tab" data-tab="crossword" role="tab" aria-selected="false" aria-controls="crossword">Crossword</div>
+        <div class="tab" data-tab="admin" role="tab" aria-selected="false" aria-controls="admin">Admin</div>
+      </div>
+    </header>
+
+    <!-- WORDLE (PLAY) -->
+    <section id="wordle" class="section active" role="tabpanel" aria-labelledby="Wordle">
+      <div class="panel">
+        <div class="legend">
+          <div class="badge">Correct = green</div>
+          <div class="badge">Present = yellow</div>
+          <div class="badge">Absent = gray</div>
+        </div>
+      </div>
+      <div class="panel wordle-wrap">
+        <div id="w-board" class="board" aria-live="polite"></div>
+        <div id="w-kbrd" class="kbrd"></div>
+        <div class="btns right">
+          <button id="w-play-reset" class="ghost">Reset Wordle</button>
+          <button id="w-share">Share Result</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CROSSWORD (PLAY) -->
+    <section id="crossword" class="section" role="tabpanel" aria-labelledby="Crossword">
+      <div class="panel cw-wrap">
+        <div class="cw-viewport">
+          <div class="cw-canvas">
+            <div id="cw-grid" class="cw-grid" aria-label="Crossword grid"></div>
+          </div>
+        </div>
+
+        <div class="toolbelt">
+          <button id="tb-dir" class="ghost">Across</button>
+          <button id="tb-prev" class="ghost">Prev</button>
+          <button id="tb-next" class="ghost">Next</button>
+          <button id="cw-submit" class="ghost">Submit</button>
+          <button id="cw-clear-errors" class="ghost">Clear</button>
+          <button id="cw-play-reset" class="ghost">Reset</button>
+        </div>
+
+        <div class="clues-sheet">
+          <div class="sheet-handle"></div>
+          <div class="active-clue" id="active-clue">Tap a cell to start</div>
+          <div class="cw-clues">
+            <div class="clue">
+              <h4>Across</h4>
+              <ul id="cw-across"></ul>
+            </div>
+            <div class="clue">
+              <h4>Down</h4>
+              <ul id="cw-down"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADMIN -->
+    <section id="admin" class="section" role="tabpanel" aria-labelledby="Admin">
+      <div class="panel">
+        <h3 style="margin:0 0 10px 0">Wordle Settings</h3>
+        <div class="row">
+          <div>
+            <label>Answer (4–8 letters)</label>
+            <input id="w-answer" type="text" placeholder="e.g., REACT" inputmode="latin" autocapitalize="characters" autocomplete="off">
+            <div class="hint">Set a hidden answer; players won’t see this on the Wordle tab.</div>
+          </div>
+          <div>
+            <label>Word length</label>
+            <input id="w-len" type="number" min="4" max="8" value="5">
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div>
+            <label><input id="w-daily" type="checkbox"> Daily mode (seed by date)</label>
+          </div>
+          <div class="btns right">
+            <button id="w-new" class="ghost">Commit Settings</button>
+            <button id="w-admin-reset" class="warn">Reset Wordle</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3 style="margin:0 0 10px 0">Crossword Builder</h3>
+        <div class="row">
+          <div>
+            <label>Clues JSON (no positions)</label>
+            <textarea id="cw-json" placeholder='[
+  {"dir":"across","answer":"REACT","clue":"Library for UIs"},
+  {"dir":"down","answer":"STATE","clue":"Data that changes"}
+]'></textarea>
+            <div class="hint">Each item: dir (across|down), answer, clue. Grid size is auto-selected; tiles start blank for players.</div>
+          </div>
+        </div>
+        <div class="btns right">
+          <button id="cw-build" class="ghost">Auto-Build Grid</button>
+          <button id="cw-import" class="ghost">Load JSON</button>
+          <button id="cw-export">Export JSON</button>
+          <button id="cw-admin-reset" class="warn">Reset Crossword</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
