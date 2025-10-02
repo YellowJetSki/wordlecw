@@ -63,41 +63,29 @@
   .legend{display:flex;gap:8px;flex-wrap:wrap}
   .badge{padding:4px 8px;border-radius:999px;border:1px solid #2b3246;background:#121a33;font-size:.8rem}
 
-  /* Crossword layout */
+  /* Crossword */
   .cw-wrap{display:grid;gap:12px}
-  .cw-viewport{position:relative;overflow:hidden;border-radius:14px;border:1px solid #232b44;background:linear-gradient(180deg,#151b31,#0f1426)}
-  .cw-canvas{transform-origin:0 0;touch-action:none}
-  .cw-grid{display:grid;gap:2px;justify-content:center}
+  .cw-grid{display:grid;gap:2px;justify-content:center;background:linear-gradient(180deg,#151b31,#0f1426);padding:10px;border-radius:16px;border:1px solid #232b44}
   .cw-cell{width:34px;height:34px;background:#0e1424;border:1px solid #2b3246;border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;font-weight:800;text-transform:uppercase}
   .cw-cell.black{background:#000;border-color:#000}
   .cw-num{position:absolute;top:2px;left:4px;font-size:.62rem;color:var(--muted);font-weight:700}
   .cw-letter{position:relative;z-index:1}
   .cw-cell input{position:absolute;inset:0;width:100%;height:100%;opacity:0}
   .cw-cell.disabled{opacity:.5}
-  .toolbelt{position:sticky;bottom:0;display:flex;gap:8px;justify-content:space-between;background:linear-gradient(180deg,#141a33,#0e1426);border:1px solid #232b44;border-radius:12px;padding:8px;margin-top:8px}
   .cw-clues{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
   .clue{background:linear-gradient(180deg,#141a33,#0e1426);border:1px solid #232b44;border-radius:14px;padding:12px}
   .clue h4{margin:0 0 6px 0}
   .clue ul{list-style:none;padding-left:0;margin:0}
   .clue li{margin:6px 0}
-  .clues-sheet{position:sticky;bottom:0;background:linear-gradient(180deg,#10162a,#0b1120);border:1px solid #232b44;border-radius:14px;padding:8px;box-shadow:var(--shadow)}
-  .sheet-handle{width:36px;height:4px;background:#2a3147;border-radius:999px;margin:4px auto 8px auto}
-  .active-clue{padding:6px 10px;border-radius:10px;background:#121a33;border:1px solid #232b44;margin-bottom:8px;color:var(--muted);font-size:.9rem}
-
   .active-hl{outline:2px solid var(--accent)}
   .correct{background:var(--ok)!important}
   .incorrect{background:var(--bad)!important}
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));background:#1e253a;color:#fff;padding:10px 14px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s}
   .toast.show{opacity:1}
 
-  @media (max-width:380px){
-    .cw-cell{width:30px;height:30px}
-    .cw-grid{gap:1.5px}
-  }
-  @media (min-width:900px){
-    .cw-wrap{grid-template-columns:1fr 380px; align-items:start}
-    .clues-sheet{position:static}
-    .toolbelt{position:static}
+  @media (min-width:480px){
+    .tile{width:56px;height:56px}
+    .cw-cell{width:36px;height:36px}
   }
 </style>
 </head>
@@ -137,33 +125,24 @@
     <!-- CROSSWORD (PLAY) -->
     <section id="crossword" class="section" role="region" aria-labelledby="Crossword">
       <div class="panel cw-wrap">
-        <div class="cw-viewport">
-          <div class="cw-canvas">
-            <div id="cw-grid" class="cw-grid" aria-label="Crossword grid"></div>
+        <div id="cw-grid" class="cw-grid" aria-label="Crossword grid"></div>
+        <div class="btns">
+          <div>
+            <button id="cw-submit" class="ghost">Submit Crossword</button>
+            <button id="cw-clear-errors" class="ghost">Clear Errors</button>
+          </div>
+          <div>
+            <button id="cw-play-reset" class="ghost">Reset Crossword</button>
           </div>
         </div>
-
-        <div class="toolbelt">
-          <button id="tb-dir" class="ghost">Across</button>
-          <button id="tb-prev" class="ghost">Prev</button>
-          <button id="tb-next" class="ghost">Next</button>
-          <button id="cw-submit" class="ghost">Submit</button>
-          <button id="cw-clear-errors" class="ghost">Clear</button>
-          <button id="cw-play-reset" class="ghost">Reset</button>
-        </div>
-
-        <div class="clues-sheet">
-          <div class="sheet-handle"></div>
-          <div class="active-clue" id="active-clue">Tap a cell to start</div>
-          <div class="cw-clues">
-            <div class="clue">
-              <h4>Across</h4>
-              <ul id="cw-across"></ul>
-            </div>
-            <div class="clue">
-              <h4>Down</h4>
-              <ul id="cw-down"></ul>
-            </div>
+        <div class="cw-clues">
+          <div class="clue">
+            <h4>Across</h4>
+            <ul id="cw-across"></ul>
+          </div>
+          <div class="clue">
+            <h4>Down</h4>
+            <ul id="cw-down"></ul>
           </div>
         </div>
       </div>
@@ -382,65 +361,6 @@
     const cwJSON=$("#cw-json");
     let placedClues=[]; // {dir,row,col,answer,clue,num}
 
-    // Zoom & pan state
-    const viewport=document.querySelector('.cw-viewport');
-    const canvas=document.querySelector('.cw-canvas');
-    let zoom=1, minZoom=0.8, maxZoom=2.4;
-    let panX=0, panY=0, startDist=0, startZoom=1, isPanning=false, panStart={x:0,y:0};
-
-    const applyTransform=()=>{ canvas.style.transform=`translate(${panX}px,${panY}px) scale(${zoom})`; };
-
-    const getTouchMid=(t1,t2)=>({ x:(t1.clientX+t2.clientX)/2, y:(t1.clientY+t2.clientY)/2 });
-    const getDist=(t1,t2)=> Math.hypot(t1.clientX-t2.clientX, t1.clientY-t2.clientY);
-
-    viewport.addEventListener('touchstart',(e)=>{
-      if(e.touches.length===2){
-        startDist=getDist(e.touches[0], e.touches[1]);
-        startZoom=zoom;
-      } else if(e.touches.length===1){
-        isPanning=true; panStart={x:e.touches[0].clientX - panX, y:e.touches[0].clientY - panY};
-      }
-    },{passive:true});
-
-    viewport.addEventListener('touchmove',(e)=>{
-      if(e.touches.length===2){
-        const dist=getDist(e.touches[0], e.touches[1]);
-        const scale=dist/startDist;
-        const prevZoom=zoom;
-        zoom=Math.max(minZoom, Math.min(maxZoom, startZoom*scale));
-        // keep pan roughly stable around center of viewport
-        const vRect=viewport.getBoundingClientRect();
-        const mid={x:vRect.left+vRect.width/2,y:vRect.top+vRect.height/2};
-        panX = mid.x - (mid.x - panX) * (zoom/prevZoom);
-        panY = mid.y - (mid.y - panY) * (zoom/prevZoom);
-        applyTransform();
-      } else if(e.touches.length===1 && isPanning){
-        panX=e.touches[0].clientX - panStart.x;
-        panY=e.touches[0].clientY - panStart.y;
-        applyTransform();
-      }
-    },{passive:true});
-
-    viewport.addEventListener('touchend',(e)=>{
-      if(e.touches.length<2){ startDist=0; }
-      if(e.touches.length===0){ isPanning=false; }
-    },{passive:true});
-
-    const centerOnCell=(r,c)=>{
-      const grid=document.getElementById('cw-grid');
-      const cell=grid?.children[r*CW.size + c];
-      if(!cell) return;
-      const vRect=viewport.getBoundingClientRect();
-      const cRect=cell.getBoundingClientRect();
-      const cx = (cRect.left + cRect.right)/2;
-      const cy = (cRect.top + cRect.bottom)/2;
-      const vx = vRect.left + vRect.width/2;
-      const vy = vRect.top + vRect.height/2;
-      panX += (vx - cx);
-      panY += (vy - cy);
-      applyTransform();
-    };
-
     const allocGrid=n=>Array.from({length:n},()=> Array.from({length:n},()=>({char:"",black:false,number:null,disabled:false})));
 
     const renderCWGrid=()=>{
@@ -469,14 +389,12 @@
                 lastTap=now;
                 CW.focus={row:rr,col:cc,dir:CW.focus.dir};
                 highlightFocus();
-                updateActiveClueHeader();
-                centerOnCell(rr,cc);
               });
               inputEl.addEventListener("input",(e)=>{
                 if(inputEl.disabled) return;
                 const v=e.target.value.toUpperCase().replace(/[^A-Z]/g,"");
                 if(v){ CW.cells[rr][cc].char=v.slice(-1); moveNextInWord(rr,cc); } else { CW.cells[rr][cc].char=""; }
-                persistCW(); drawLettersOnly(); updateActiveClueHeader(); centerOnCell(CW.focus.row,CW.focus.col);
+                persistCW(); drawLettersOnly();
               });
               inputEl.addEventListener("keydown",(e)=>{
                 if(inputEl.disabled) return;
@@ -489,8 +407,6 @@
                 if(e.key==="ArrowLeft"){ CW.focus.dir="across"; movePrev(rr,cc,true); e.preventDefault(); }
                 if(e.key==="ArrowDown"){ CW.focus.dir="down"; moveNext(rr,cc,true); e.preventDefault(); }
                 if(e.key==="ArrowUp"){ CW.focus.dir="down"; movePrev(rr,cc,true); e.preventDefault(); }
-                updateActiveClueHeader();
-                centerOnCell(CW.focus.row,CW.focus.col);
               });
             })(r,c,inp,d);
           }
@@ -498,12 +414,11 @@
         }
       }
       numberGrid();
-      syncPlacedNumbers();
-      markDisabledRuns();
+      syncPlacedNumbers(); // assign canonical numbers to placed clues
+      markDisabledRuns();  // disable only non-placed runs
       drawDisabledState();
       highlightFocus();
-      updateActiveClueHeader();
-      renderClueList();
+      renderClueList();    // lists built only from placedClues with num; now unordered lists
     };
 
     const drawLettersOnly=()=>{
@@ -543,36 +458,34 @@
     const escapeHTML=s=>s.replace(/[&<>"]/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 
     const renderClueList=()=>{
-      const acrossEl=$("#cw-across"), downEl=$("#cw-down");
-      if(!acrossEl || !downEl) return;
-      acrossEl.innerHTML=""; downEl.innerHTML="";
+      if(!cwAcross || !cwDown) return;
+      cwAcross.innerHTML=""; cwDown.innerHTML="";
+      // Only placed clues with a valid number are listed
       const A = placedClues.filter(p=>p.dir==="across" && Number.isInteger(p.num)).sort((x,y)=>x.num-y.num);
       const D = placedClues.filter(p=>p.dir==="down"   && Number.isInteger(p.num)).sort((x,y)=>x.num-y.num);
 
-      const mkLI=(p,len)=>{
+      const mkLI=(n, clue, len)=>{
         const li=document.createElement("li");
-        li.innerHTML = `<span class="num" style="min-width:28px;display:inline-block">${p.num}.</span> ${escapeHTML(p.clue||"(no clue)")} <span class="hint">(${len})</span>`;
-        li.addEventListener("click", ()=>{
-          CW.focus={row:p.row,col:p.col,dir:p.dir};
-          highlightFocus(); updateActiveClueHeader(); centerOnCell(p.row,p.col);
-        });
+        li.innerHTML = `<span class="num" style="min-width:28px;display:inline-block">${n}.</span> ${escapeHTML(clue||"(no clue)")} <span class="hint">(${len})</span>`;
         return li;
       };
 
       A.forEach(p=>{
         let len=0; let c=p.col;
         while(c<CW.size && !CW.cells[p.row][c].black){ len++; c++; }
-        acrossEl.appendChild(mkLI(p,len));
+        cwAcross.appendChild(mkLI(p.num, p.clue, len));
       });
       D.forEach(p=>{
         let len=0; let r=p.row;
         while(r<CW.size && !CW.cells[r][p.col].black){ len++; r++; }
-        downEl.appendChild(mkLI(p,len));
+        cwDown.appendChild(mkLI(p.num, p.clue, len));
       });
     };
 
     const markDisabledRuns=()=>{
+      // default: disable any non-black
       for(let r=0;r<CW.size;r++) for(let c=0;c<CW.size;c++) CW.cells[r][c].disabled = !CW.cells[r][c].black;
+      // enable along placed words
       for(const p of placedClues){
         if(!Number.isInteger(p.num)) continue;
         const {dir,row,col,answer}=p;
@@ -582,6 +495,7 @@
           if(!CW.cells[rr][cc].black) CW.cells[rr][cc].disabled=false;
         }
       }
+      // clear any stray letters on disabled cells
       for(let r=0;r<CW.size;r++) for(let c=0;c<CW.size;c++) if(CW.cells[r][c].disabled) CW.cells[r][c].char="";
     };
 
@@ -617,8 +531,6 @@
       if(rr>=CW.size || cc>=CW.size) return;
       CW.focus={row:rr,col:cc,dir:CW.focus.dir};
       highlightFocus();
-      updateActiveClueHeader();
-      centerOnCell(rr,cc);
     };
     const movePrev=(r,c)=>{
       let rr=r, cc=c;
@@ -627,8 +539,6 @@
       if(rr<0 || cc<0) return;
       CW.focus={row:rr,col:cc,dir:CW.focus.dir};
       highlightFocus();
-      updateActiveClueHeader();
-      centerOnCell(rr,cc);
     };
 
     const moveNextInWord=(r,c)=>{
@@ -641,8 +551,6 @@
         if(rr<=b.r2){ CW.focus={row:rr,col:c,dir:"down"}; }
       }
       highlightFocus();
-      updateActiveClueHeader();
-      centerOnCell(CW.focus.row,CW.focus.col);
     };
     const movePrevInWord=(r,c)=>{
       const b=wordBounds(r,c,CW.focus.dir);
@@ -654,8 +562,6 @@
         if(rr>=b.r1){ CW.focus={row:rr,col:c,dir:"down"}; }
       }
       highlightFocus();
-      updateActiveClueHeader();
-      centerOnCell(CW.focus.row,CW.focus.col);
     };
 
     const highlightFocus=()=>{
@@ -790,10 +696,10 @@
       }
       placedClues=best.placed;
       numberGrid();
-      syncPlacedNumbers();
+      syncPlacedNumbers();  // write numbers onto placed clues once
       markDisabledRuns();
       drawDisabledState();
-      renderCWGrid();
+      renderCWGrid();      // lists render with UL; numbers printed manually
       persistCW();
     };
 
@@ -841,40 +747,6 @@
       markDisabledRuns();
       renderCWGrid();
     };
-
-    // Toolbelt + active clue header
-    const btnDir=$("#tb-dir"), btnPrev=$("#tb-prev"), btnNext=$("#tb-next"), activeClueEl=$("#active-clue");
-    const updateActiveClueHeader=()=>{
-      const dir=CW.focus.dir;
-      let r=CW.focus.row, c=CW.focus.col;
-      if(dir==="across"){ while(c>0 && !CW.cells[r][c-1].black && !CW.cells[r][c-1].disabled) c--; }
-      else { while(r>0 && !CW.cells[r-1][c].black && !CW.cells[r-1][c].disabled) r--; }
-      const match = placedClues.find(p=>p.dir===dir && p.row===r && p.col===c && Number.isInteger(p.num));
-      if(match){
-        activeClueEl.textContent = `${match.num} ${dir==="across"?"Across":"Down"} — ${match.clue||""}`;
-      } else {
-        activeClueEl.textContent = "Tap a cell to start";
-      }
-      btnDir.textContent = dir==="across"?"Across":"Down";
-    };
-    btnDir?.addEventListener("click", ()=>{
-      CW.focus.dir = CW.focus.dir==="across"?"down":"across";
-      updateActiveClueHeader(); highlightFocus(); centerOnCell(CW.focus.row,CW.focus.col);
-    });
-    btnPrev?.addEventListener("click", ()=>{
-      const list = placedClues.filter(p=>p.dir===CW.focus.dir && Number.isInteger(p.num)).sort((a,b)=>a.num-b.num);
-      let idx = list.findIndex(p=>p.row===CW.focus.row && p.col===CW.focus.col);
-      if(idx<0) idx=0;
-      const target = list[(idx-1+list.length)%list.length];
-      if(target){ CW.focus={row:target.row,col:target.col,dir:target.dir}; highlightFocus(); updateActiveClueHeader(); centerOnCell(target.row,target.col); }
-    });
-    btnNext?.addEventListener("click", ()=>{
-      const list = placedClues.filter(p=>p.dir===CW.focus.dir && Number.isInteger(p.num)).sort((a,b)=>a.num-b.num);
-      let idx = list.findIndex(p=>p.row===CW.focus.row && p.col===CW.focus.col);
-      if(idx<0) idx=0;
-      const target = list[(idx+1)%list.length];
-      if(target){ CW.focus={row:target.row,col:target.col,dir:target.dir}; highlightFocus(); updateActiveClueHeader(); centerOnCell(target.row,target.col); }
-    });
 
     // Admin hooks
     $("#cw-build")?.addEventListener("click", ()=>{
