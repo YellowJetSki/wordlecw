@@ -23,7 +23,7 @@
       </div>
     </header>
 
-    <!-- WORDLE (PLAY) -->
+    <!-- WORDLE -->
     <section id="wordle" class="section active" role="tabpanel" aria-labelledby="Wordle">
       <div class="panel">
         <div class="legend">
@@ -42,7 +42,7 @@
       </div>
     </section>
 
-    <!-- CROSSWORD (PLAY) -->
+    <!-- CROSSWORD -->
     <section id="crossword" class="section" role="tabpanel" aria-labelledby="Crossword">
       <div class="panel cw-wrap">
         <div class="cw-viewport safe-area-bottom">
@@ -56,9 +56,9 @@
           <button id="tb-dir" class="ghost">Across</button>
           <button id="tb-prev" class="ghost">Prev</button>
           <button id="tb-next" class="ghost">Next</button>
-          <button id="cw-submit" class="ghost">Submit</button>
-          <button id="cw-clear-errors" class="ghost">Clear</button>
-          <button id="cw-play-reset" class="ghost">Reset</button>
+          <button id="cw-submit">Submit</button>
+          <button id="cw-clear" class="ghost">Clear Marks</button>
+          <button id="cw-reset" class="ghost">Reset</button>
         </div>
 
         <div class="clues-sheet" id="clues-sheet">
@@ -107,19 +107,19 @@
         <h3 style="margin:0 0 10px 0">Crossword Builder</h3>
         <div class="row">
           <div>
-            <label>Clues JSON (no positions)</label>
+            <label>Clues JSON (dir, answer, clue)</label>
             <textarea id="cw-json" placeholder='[
   {"dir":"across","answer":"REACT","clue":"Library for UIs"},
   {"dir":"down","answer":"STATE","clue":"Data that changes"}
 ]'></textarea>
-            <div class="hint">Each item: dir (across|down), answer, clue. Grid size is auto-selected; tiles start blank for players.</div>
+            <div class="hint">Paste a clue list; grid is auto-built and symmetric. Players type into highlighted answers.</div>
           </div>
         </div>
         <div class="btns right">
-          <button id="cw-build" class="ghost">Auto-Build Grid</button>
+          <button id="cw-build" class="ghost">Auto-Build</button>
           <button id="cw-import" class="ghost">Load JSON</button>
           <button id="cw-export">Export JSON</button>
-          <button id="cw-admin-reset" class="warn">Reset Crossword</button>
+          <button id="cw-admin-reset" class="warn">Reset Grid</button>
         </div>
       </div>
     </section>
