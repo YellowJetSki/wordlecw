@@ -255,7 +255,7 @@
     // Zoom & pan
     const viewport=document.querySelector('.cw-viewport');
     const canvas=document.querySelector('.cw-canvas');
-    let zoom=1, minZoom=0.8, maxZoom=2.4;
+    let zoom=1, minZoom=0.85, maxZoom=2.4;
     let panX=0, panY=0, startDist=0, startZoom=1, isPanning=false, panStart={x:0,y:0};
     const applyTransform=()=>{ canvas.style.transform=`translate(${panX}px,${panY}px) scale(${zoom})`; };
     const getDist=(t1,t2)=> Math.hypot(t1.clientX-t2.clientX, t1.clientY-t2.clientY);
@@ -311,9 +311,14 @@
     const renderCWGrid=()=>{
       if(!cwGrid) return;
       cwGrid.innerHTML="";
-      // Responsive columns: compute by viewport width
-      const ideal = Math.min(42, Math.max(30, Math.floor(viewport.clientWidth / CW.size) - 2));
-      const cellPx = Math.max(30, ideal);
+
+      // Responsive cell size by viewport
+      const vpw = viewport.clientWidth || cwGrid.clientWidth || 360;
+      const gap = 2;
+      const totalGaps = gap*(CW.size-1);
+      const maxGridWidth = Math.max(260, vpw - 16);
+      const cellPx = Math.max(30, Math.floor((maxGridWidth - totalGaps)/CW.size));
+      cwGrid.style.gap = gap+"px";
       cwGrid.style.gridTemplateColumns=`repeat(${CW.size}, ${cellPx}px)`;
 
       for(let r=0;r<CW.size;r++){
@@ -419,7 +424,7 @@
       if(!acrossEl || !downEl) return;
       acrossEl.innerHTML=""; downEl.innerHTML="";
       const A = placedClues.filter(p=>p.dir==="across" && Number.isInteger(p.num)).sort((x,y)=>x.num-y.num);
-      const D = placedClues.filter(p=>p.dir==="down"   && Number.isInteger(p.num)).sort((x,y)=>x.num-y.num);
+      const D = placedClues.filter(p=>p.dir==="down"   && Number.isInteger(p.num)).sort((x,y)=>x.num-y-num);
 
       const mkLI=(p,len)=>{
         const li=document.createElement("li");
@@ -562,7 +567,7 @@
       }
     };
 
-    // Auto-size + placement
+    // Sizing helper for new builds
     const suggestSizes=(entries)=>{
       const words=entries.map(e=>(e.answer||"").toUpperCase().replace(/[^A-Z]/g,"")).filter(x=>x.length>=2);
       const maxLen = Math.max(...words.map(w=>w.length), 3);
@@ -744,6 +749,7 @@
     };
 
     const btnDir=$("#tb-dir"), btnPrev=$("#tb-prev"), btnNext=$("#tb-next"), activeClueEl=$("#active-clue"), sheetToggle=$("#sheet-toggle");
+
     const updateActiveClueHeader=()=>{
       const dir=CW.focus.dir;
       let r=CW.focus.row, c=CW.focus.col;
@@ -788,14 +794,14 @@
       }
     });
 
-    // Clues sheet toggle for compact screens
+    // Clues sheet toggle
     let sheetOpen=true;
     const sheetEl=document.querySelector(".clues-sheet");
     const setSheetState=(open)=>{
       sheetOpen=open;
       if(!sheetEl) return;
       if(open){
-        sheetEl.style.maxHeight="42vh";
+        sheetEl.style.maxHeight="var(--sheet-max)";
         sheetEl.style.opacity="1";
       }else{
         sheetEl.style.maxHeight="0px";
